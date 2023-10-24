@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+config:
+  bot:
+    name: CSNDistributedFileStorageBot
+    token: 6726806536:AAFr1EAUSPN2Urx26Otd_6AGflEinzKGEUs
+    texts:
+      document_saving: Your file saved
+      get_documents_names: /document_list
+      no_documents_yet: You did not save file yet. To save file just send it.
+      document_not_found: Document with such name was not found.
