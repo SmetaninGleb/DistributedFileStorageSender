@@ -49,11 +49,14 @@ public class FileStorageTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
-        if (message.hasDocument()) {
+        if (message.hasDocument())
+        {
             processDocumentSaving(update);
-        } else if (message.getText().equals(getDocumentsNamesText)){
+        } else if (message.getText().equals(getDocumentsNamesText))
+        {
             processGettingNames(update);
-        } else {
+        } else
+        {
             processSendDocument(update);
         }
     }
@@ -99,22 +102,24 @@ public class FileStorageTelegramBot extends TelegramLongPollingBot {
 
     private void processGettingNames(Update update) {
         List<String> nameList = messageProcessingService.getDocumentsNames(update);
-        if (!nameList.isEmpty())
+        String ansStr = nameList
+                .stream()
+                .reduce((acc, name) -> acc + "\n" + name)
+                .get();
+        if (ansStr.isBlank())
         {
-            String ansStr = nameList
-                    .stream()
-                    .reduce((acc, name) -> acc + "\n" + name)
-                    .get();
-            sendMessage(update, ansStr);
-        } else {
             sendMessage(update, noDocumentsYetText);
+        } else
+        {
+            sendMessage(update, ansStr);
         }
     }
 
     private void processSendDocument(Update update) {
         List<String> namesList = messageProcessingService.getDocumentsNames(update);
         String documentName = update.getMessage().getText();
-        if (!namesList.contains(documentName)) {
+        if (!namesList.contains(documentName))
+        {
             sendMessage(update, documentNotFoundText);
             return;
         }

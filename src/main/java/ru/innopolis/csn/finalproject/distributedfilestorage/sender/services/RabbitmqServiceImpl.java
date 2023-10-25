@@ -68,6 +68,7 @@ public class RabbitmqServiceImpl implements RabbitmqService {
                 .withBody(getDocumentListMessageName.getBytes())
                 .setHeader(chatIdHeaderName, chatId)
                 .build();
+        rabbitTemplate.setExchange("");
         return (String) rabbitTemplate.convertSendAndReceive(getDocumentListQueueName, message);
     }
 
@@ -77,6 +78,7 @@ public class RabbitmqServiceImpl implements RabbitmqService {
                 .withBody(filename.getBytes())
                 .setHeader(chatIdHeaderName, chatId)
                 .build();
+        rabbitTemplate.setExchange("");
         Message rabbitAns = rabbitTemplate.sendAndReceive(queue, sendMes);
         byte[] fileBytes = rabbitAns.getBody();
         return new FileData(filename, fileBytes);
