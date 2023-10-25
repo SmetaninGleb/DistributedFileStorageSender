@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.innopolis.csn.finalproject.distributedfilestorage.sender.utils.FileData;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,12 @@ public class RabbitmqServiceImpl implements RabbitmqService {
 
     @Value("${config.rabbitmq.chat_id_header_name}")
     private String chatIdHeaderName;
+
+    @Value("${config.rabbitmq.messages.get_document_list}")
+    private String getDocumentListMessageName;
+
+    @Value("${config.rabbitmq.get_document_list_queue_name}")
+    private String getDocumentListQueueName;
 
     @Autowired
     public RabbitmqServiceImpl(RabbitTemplate rabbitTemplate) {
@@ -56,12 +63,22 @@ public class RabbitmqServiceImpl implements RabbitmqService {
     }
 
     @Override
-    public String sendAndReceive(String queue, String message) {
-        return (String) rabbitTemplate.convertSendAndReceive(queue, message);
+    public String sendAndReceiveFileList(String chatId) {
+        Message message = MessageBuilder
+                .withBody(getDocumentListMessageName.getBytes())
+                .setHeader(chatIdHeaderName, chatId)
+                .build();
+        return (String) rabbitTemplate.convertSendAndReceive(getDocumentListQueueName, message);
     }
 
     @Override
-    public File sendAndReceiveFile(String queue, String message) {
-        return (File) rabbitTemplate.convertSendAndReceive(queue, message);
+    public FileData sendAndReceiveFile(String queue, String filename, String chatId) {
+        Message sendMes = MessageBuilder
+                .withBody(filename.getBytes())
+                .setHeader(chatIdHeaderName, chatId)
+                .build();
+        Message rabbitAns = rabbitTemplate.sendAndReceive(queue, sendMes);
+        byte[] fileBytes = rabbitAns.getBody();
+        return new FileData(filename, fileBytes);
     }
 }

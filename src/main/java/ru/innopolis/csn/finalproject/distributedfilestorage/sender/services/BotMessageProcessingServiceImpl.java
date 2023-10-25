@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.innopolis.csn.finalproject.distributedfilestorage.sender.utils.FileData;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -15,10 +17,6 @@ public class BotMessageProcessingServiceImpl implements BotMessageProcessingServ
 
     private final RabbitmqService rabbitmqService;
 
-    @Value("${config.rabbitmq.messages.get_document_list}")
-    private String getDocumentListMessageName;
-    @Value("${config.rabbitmq.get_document_list_queue_name}")
-    private String getDocumentListQueueName;
     @Value("${config.rabbitmq.get_document_queue_name}")
     private String getDocumentQueueName;
 
@@ -33,17 +31,22 @@ public class BotMessageProcessingServiceImpl implements BotMessageProcessingServ
 
     @Override
     public List<String> getDocumentsNames(Update update) {
-        String reply = rabbitmqService.sendAndReceive(getDocumentListQueueName, getDocumentListMessageName);
+        String chatId = update.getMessage().getChatId().toString();
+        String reply = rabbitmqService.sendAndReceiveFileList(chatId);
         return List.of(reply.split("\n"));
     }
 
     @Override
     public SendDocument getDocument(Update update) {
-        File file = rabbitmqService.sendAndReceiveFile(getDocumentQueueName, update.getMessage().getText());
+        String filename = update.getMessage().getText();
+        String chatId = update.getMessage().getChatId().toString();
+        FileData fileData = rabbitmqService.sendAndReceiveFile(getDocumentQueueName, filename, chatId);
         SendDocument sendDocument = new SendDocument();
         InputFile inputFile = new InputFile();
-        inputFile.setMedia(file);
-        sendDocument.setDocument(new InputFile());
+        ByteArrayInputStream byteStream = new ByteArrayInputStream(fileData.getFileBytes());
+        inputFile.setMedia(byteStream, fileData.getFilename());
+        sendDocument.setDocument(inputFile);
+        sendDocument.setChatId(chatId);
         return sendDocument;
     }
 }
