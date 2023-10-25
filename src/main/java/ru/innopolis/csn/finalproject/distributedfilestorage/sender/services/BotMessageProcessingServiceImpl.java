@@ -1,30 +1,49 @@
 package ru.innopolis.csn.finalproject.distributedfilestorage.sender.services;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.innopolis.csn.finalproject.distributedfilestorage.sender.utils.SendType;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Service
 public class BotMessageProcessingServiceImpl implements BotMessageProcessingService {
 
-    @Override
-    public void saveDocument(Update update) {
+    private final RabbitmqService rabbitmqService;
 
+    @Value("${config.rabbitmq.messages.get_document_list}")
+    private String getDocumentListMessageName;
+    @Value("${config.rabbitmq.get_document_list_queue_name}")
+    private String getDocumentListQueueName;
+    @Value("${config.rabbitmq.get_document_queue_name}")
+    private String getDocumentQueueName;
+
+    public BotMessageProcessingServiceImpl(RabbitmqService rabbitmqService) {
+        this.rabbitmqService = rabbitmqService;
+    }
+
+    @Override
+    public void saveDocument(File file, String filename, String chatId) throws IOException {
+        rabbitmqService.send(file, filename, chatId);
     }
 
     @Override
     public List<String> getDocumentsNames(Update update) {
-        return null;
+        String reply = rabbitmqService.sendAndReceive(getDocumentListQueueName, getDocumentListMessageName);
+        return List.of(reply.split("\n"));
     }
 
     @Override
     public SendDocument getDocument(Update update) {
-        return null;
+        File file = rabbitmqService.sendAndReceiveFile(getDocumentQueueName, update.getMessage().getText());
+        SendDocument sendDocument = new SendDocument();
+        InputFile inputFile = new InputFile();
+        inputFile.setMedia(file);
+        sendDocument.setDocument(new InputFile());
+        return sendDocument;
     }
 }

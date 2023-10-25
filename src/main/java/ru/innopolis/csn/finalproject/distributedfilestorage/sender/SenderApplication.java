@@ -9,7 +9,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.LongPollingBot;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-@Configuration
 @SpringBootApplication
 public class SenderApplication {
 
@@ -17,10 +16,4 @@ public class SenderApplication {
 		SpringApplication.run(SenderApplication.class, args);
 	}
 
-	@Bean
-	public TelegramBotsApi telegramBotsApi(LongPollingBot longPollingBot) throws TelegramApiException {
-		TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-		botsApi.registerBot(longPollingBot);
-		return botsApi;
-	}
 }

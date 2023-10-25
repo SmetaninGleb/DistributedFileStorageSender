@@ -1,12 +1,28 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
 server:
   port: 8080
 
 config:
   bot:
-    name: CSNDistributedFileStorageBot
-    token: 6726806536:AAFr1EAUSPN2Urx26Otd_6AGflEinzKGEUs
+    name: ${bot_name}
+    token: ${bot_token}
     texts:
-      document_saving: Your file saved
+      document_saving: Your file is saved.
       get_documents_names: /document_list
       no_documents_yet: You did not save file yet. To save file just send it.
       document_not_found: Document with such name was not found.
+      getting_file_error: Could not get your file. Please, try again...
+  rabbitmq:
+    sender_exchange_name: sender
+    get_document_list_queue_name: document_list
+    get_document_queue_name: document
+    filename_header_name: filename
+    chat_id_header_name: chat_id
+    messages:
+      get_document_list: get_document_list
