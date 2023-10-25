@@ -1,12 +1,12 @@
 spring:
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${rabbitmq_host}
+    port: ${rabbitmq_port}
+    username: ${rabbitmq_username}
+    password: ${rabbitmq_password}
 
 server:
-  port: 8080
+  port: ${server_port}
 
 config:
   bot:
@@ -19,10 +19,10 @@ config:
       document_not_found: Document with such name was not found.
       getting_file_error: Could not get your file. Please, try again...
   rabbitmq:
-    sender_exchange_name: sender
-    get_document_list_queue_name: document_list
-    get_document_queue_name: document
-    filename_header_name: filename
-    chat_id_header_name: chat_id
+    sender_exchange_name: ${rabbitmq_sender_exchange_name}
+    get_document_list_queue_name: ${document_list_queue_name}
+    get_document_queue_name: ${document_queue_name}
+    filename_header_name: ${filename_header_name}
+    chat_id_header_name: ${chat_id_header_name}
     messages:
       get_document_list: get_document_list
